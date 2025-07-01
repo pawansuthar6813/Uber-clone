@@ -8,17 +8,20 @@ import { useEffect, useRef, useState } from 'react';
 import AcceptRide from '../Components/AcceptRide.jsx';
 import { useSocket } from '../Context/SocketContext.jsx';
 import { useCaptain } from '../Context/CaptainContext.jsx';
+import axios from 'axios';
 
 const CaptainHome = () => {
 
 
-  const [ridePopUpPanelOpen, setRidePopUpPanelOpen] = useState(true);
+  const [ridePopUpPanelOpen, setRidePopUpPanelOpen] = useState(false);
   const ridePopUpPanelRef = useRef(null);
 
   const [acceptRidePanelOpen, setAcceptRidePanelOpen] = useState(false);
   const acceptRidePanelRef = useRef(null);
 
-  const { socket, sendMessage, receiveMessage} = useSocket();
+  const [ride, setRide] = useState(null);
+
+  const { socket, sendMessage, receiveMessage } = useSocket();
   const { captain, setCaptain } = useCaptain();
 
   const navigate = useNavigate();
@@ -26,12 +29,53 @@ const CaptainHome = () => {
     navigate("/captain/logout")
   }
 
+  
+
+  // function to handle confirm ride logic
+  const confirmRide = async () => {
+    // call confirm ride api
+    const token = localStorage.getItem("CaptainToken");
+
+    const response = await axios.post('http://localhost:8080/api/rides/confirm-ride', {
+      userId: ride.userId, captainId: captain._id, rideId: ride._id
+    }, {
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    setRidePopUpPanelOpen(false)
+    setAcceptRidePanelOpen(true)
+  }
+
   useEffect(() => {
-
     // register captain socketId in database
-    sendMessage("join", {userId: captain._id, userType: "captain"})
+    sendMessage("join", { userId: captain._id, userType: "captain" })
 
+    receiveMessage('new-ride', (data) => {
+    console.log(data);
+    setRide(data)
   })
+
+    const updateLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position =>
+          socket.emit('update-captain-location', {
+            userId: captain._id,
+            location: {
+              ltd: 23.2115643 || position.coords.latitude,
+              lng: 77.4046559 || position.coords.longitude
+            }
+          })
+        );
+      }
+    };
+
+
+    const locationInterval = setInterval(updateLocation, 10000);
+    return () => clearInterval(locationInterval);
+  }, []);
 
   return (
 
@@ -75,14 +119,17 @@ const CaptainHome = () => {
           ridePopUpPanelRef={ridePopUpPanelRef}
           ridePopUpPanelOpen={ridePopUpPanelOpen}
           setAcceptRidePanelOpen={setAcceptRidePanelOpen}
+          ride={ride}
+          confirmRide={confirmRide}
         />
 
         <div className='w-screen h-full'>
-          <AcceptRide 
+          <AcceptRide
             acceptRidePanelOpen={acceptRidePanelOpen}
             setAcceptRidePanelOpen={setAcceptRidePanelOpen}
             acceptRidePanelRef={acceptRidePanelRef}
             setRidePopUpPanelOpen={setRidePopUpPanelOpen}
+            ride={ride}
           />
         </div>
 

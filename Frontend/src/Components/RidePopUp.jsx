@@ -12,10 +12,30 @@ const RidePopUp = ({
     ridePopUpPanelRef,
     ridePopUpPanelOpen,
     setRidePopUpPanelOpen,
-    setAcceptRidePanelOpen
+    setAcceptRidePanelOpen,
+    ride,
+    confirmRide
 }) => {
 
     const arrRef = useRef(null);
+
+    let {pickupLocation, destinationLocation, user, distance, duration, fare} = ride || {};
+
+    const pickup = {
+        mainAddress: ride?.pickupLocation.split(",")[0] || "",
+        completeAddress: ride?.pickupLocation.split(",").slice(1).join(",") || ""
+    };
+
+    const destination = {
+        mainAddress: ride?.destinationLocation.split(",")[0] || "",
+        completeAddress: ride?.destinationLocation.split(",").slice(1).join(",") || ""
+    };
+    
+    if(ride){
+        setRidePopUpPanelOpen(true)
+    } else {
+        setRidePopUpPanelOpen(false)
+    }
 
     function arrClickHandler() {
         setRidePopUpPanelOpen(false);
@@ -48,9 +68,9 @@ const RidePopUp = ({
             <div className='w-[90%] h-16 flex flex-row p-3 justify-between items-center mt-20 bg-yellow-400 rounded-lg'>
                 <div className='flex flex-row justify-start gap-2 items-center'>
                     <img className='h-10 w-10 rounded-full border' src={personFaceImgage} alt="" />
-                    <h4 className='font-semibold'>Harsh Patel</h4>
+                    <h4 className='font-semibold'>{`${user?.fullName.firstName || ""} ${user?.fullName.lastName || ""}`}</h4>
                 </div>
-                <h4 className='font-semibold'>2.2KM</h4>
+                <h4 className='font-semibold'>{`${distance}KM`}</h4>
             </div>
 
 
@@ -63,8 +83,8 @@ const RidePopUp = ({
                 <div className='flex flex-row w-full justify-start items-center gap-3 ml-3'>
                     <img className='h-5' src={mapPinImage} alt="" />
                     <div className='flex flex-col items-start justify-around'>
-                        <h3 className='font-semibold text-lg'>562/11-A</h3>
-                        <h3>Kaikondrahalli, Bengluru, Karnataka</h3>
+                        <h3 className='font-semibold text-lg'>{pickup.mainAddress}</h3>
+                        <h3>{pickup.completeAddress}</h3>
                     </div>
                 </div>
 
@@ -74,8 +94,8 @@ const RidePopUp = ({
                 <div className='w-full flex justify-start items-center gap-3 ml-3'>
                     <img className='h-5' src={dropLocationImage} alt="" />
                     <div className='flex flex-col items-start justify-around'>
-                        <h3 className='font-semibold text-lg'>Third Wave Coffie</h3>
-                        <h3>17th cross road, Pwd Quartres, 1st sector, Hsr Layout, Bengaluru, Karnataka</h3>
+                        <h3 className='font-semibold text-lg'>{destination.mainAddress}</h3>
+                        <h3>{destination.completeAddress}</h3>
                     </div>
                 </div>
 
@@ -85,7 +105,7 @@ const RidePopUp = ({
                 <div className='w-full flex justify-start items-center gap-3 ml-3'>
                     <img className='h-5' src={cardImage} alt="" />
                     <div className='flex flex-col items-start justify-around'>
-                        <h3 className='font-semibold text-lg'>193.20</h3>
+                        <h3 className='font-semibold text-lg'>{fare || ""}</h3>
                         <h3>Cash Cash</h3>
                     </div>
                 </div>
@@ -96,7 +116,7 @@ const RidePopUp = ({
             </div>
 
             <div className='w-full flex flex-col justify-center items-center gap-3 mb-10 mt-5'>
-                <button onClick={() => {setAcceptRidePanelOpen(true)}} className='w-[85%] h-10 bg-green-600 rounded-lg cursor-pointer '>Accept Ride</button>
+                <button onClick={confirmRide} className='w-[85%] h-10 bg-green-600 rounded-lg cursor-pointer '>Accept Ride</button>
                 <button onClick={arrClickHandler} className='w-[85%] h-10 bg-gray-400 rounded-lg cursor-pointer '>Ignore</button>
             </div>
         </div>

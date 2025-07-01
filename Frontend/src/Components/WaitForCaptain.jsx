@@ -7,6 +7,7 @@ import ratingStarImage from '../assets/rating-star.png';
 import { useState } from 'react';
 import personFaceImgage from "../assets/person-face.png";
 import cardImage from '../assets/bank-card.png'
+import { useRide } from '../Context/RideContext.jsx';
 
 
 const WaitForCaptain = ({
@@ -27,6 +28,7 @@ const WaitForCaptain = ({
 }) => {
 
     const [copied, setCopied] = useState(false);
+
 
     const handleCopy = async () => {
         try {
@@ -63,11 +65,11 @@ const WaitForCaptain = ({
                 transform: 'translateY(100%)'
             })
         }
-    }, [waitForCaptainPanelRef]);
+    }, [waitForCaptainPanelOpen]);
 
 
     return (
-        <div id='waitForCaptainPanel' className='bg-white w-full absolute bottom-0 z-60 flex flex-col gap-2 rounded-xl' ref={waitForCaptainPanelRef}>
+        <div id='waitForCaptainPanel' className='bg-white w-full absolute bottom-0 z-80 flex flex-col gap-2 rounded-xl' ref={waitForCaptainPanelRef}>
             <div className='w-full h-16 flex flex-row items-center'>
                 <h3 className='font-semibold text-xl absolute left-2'>Meet at the pickup point</h3>
                 <div className='flex flex-col w-10 pt-1 pb-1 m-2 bg-black justify-evenly items-center absolute right-3 text-white'>

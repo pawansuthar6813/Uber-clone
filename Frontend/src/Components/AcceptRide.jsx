@@ -14,11 +14,24 @@ const AcceptRide = ({
   setAcceptRidePanelOpen,
   acceptRidePanelRef,
   setRidePopUpPanelOpen,
+  ride
 }) => {
 
   const [OTP, setOTP] = useState("");
   const arrRef = useRef(null);
   const navigate = useNavigate();
+
+  let {pickupLocation, destinationLocation, user, distance, duration, fare} = ride || {};
+
+    const pickup = {
+        mainAddress: ride?.pickupLocation.split(",")[0] || "",
+        completeAddress: ride?.pickupLocation.split(",").slice(1).join(",") || ""
+    };
+
+    const destination = {
+        mainAddress: ride?.destinationLocation.split(",")[0] || "",
+        completeAddress: ride?.destinationLocation.split(",").slice(1).join(",") || ""
+    };
 
   function arrClickHandler() {
     setAcceptRidePanelOpen(false);
@@ -65,13 +78,13 @@ const AcceptRide = ({
         />
       </div>
 
-      {/* Rider Info */}
+
       <div className="w-[90%] h-16 flex flex-row p-3 justify-between items-center mt-20 bg-yellow-400 rounded-lg">
         <div className="flex flex-row justify-start gap-2 items-center">
           <img className="h-10 w-10 rounded-full border" src={personFaceImgage} alt="rider" />
-          <h4 className="font-semibold">Harsh Patel</h4>
+          <h4 className="font-semibold">{`${user?.fullName.firstName || ""} ${user?.fullName.lastName || ""}`}</h4>
         </div>
-        <h4 className="font-semibold">2.2KM</h4>
+        <h4 className="font-semibold">{`${distance} KM`}</h4>
       </div>
 
       {/* Divider */}
@@ -83,8 +96,8 @@ const AcceptRide = ({
         <div className="flex flex-row w-full justify-start items-center gap-3 ml-3">
           <img className="h-5" src={mapPinImage} alt="pickup" />
           <div className="flex flex-col items-start">
-            <h3 className="font-semibold text-lg">562/11-A</h3>
-            <h3>Kaikondrahalli, Bengluru, Karnataka</h3>
+            <h3 className="font-semibold text-lg">{pickup.mainAddress}</h3>
+            <h3>{pickup.completeAddress}</h3>
           </div>
         </div>
 
@@ -94,8 +107,8 @@ const AcceptRide = ({
         <div className="w-full flex justify-start items-center gap-3 ml-3">
           <img className="h-5" src={dropLocationImage} alt="drop" />
           <div className="flex flex-col items-start">
-            <h3 className="font-semibold text-lg">Third Wave Coffee</h3>
-            <h3>17th Cross Rd, PWD Quarters, HSR Layout, Bengaluru</h3>
+            <h3 className="font-semibold text-lg">{destination.mainAddress}</h3>
+            <h3>{destination.completeAddress}</h3>
           </div>
         </div>
 
@@ -105,7 +118,7 @@ const AcceptRide = ({
         <div className="w-full flex justify-start items-center gap-3 ml-3">
           <img className="h-5" src={cardImage} alt="payment" />
           <div className="flex flex-col items-start">
-            <h3 className="font-semibold text-lg">₹193.20</h3>
+            <h3 className="font-semibold text-lg">{`₹${fare}`}</h3>
             <h3>Cash</h3>
           </div>
         </div>

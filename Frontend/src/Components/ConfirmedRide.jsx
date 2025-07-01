@@ -66,14 +66,17 @@ const ConfirmedRide = ({
         const token = localStorage.getItem("UserToken");
 
         try {
-            const response = await axios.post(path, {
+            const reqObj = {
                 pickup: ride.pickup,
                 destination: ride.destination,
                 vehicleType: ride.vehicleType,
                 distance: ride.distance,
                 time: ride.time,
                 fare: ride.fare[ride.vehicleType]
-            }, {
+            }
+
+            // console.log("req object",reqObj);
+            const response = await axios.post(path, reqObj, {
                 withCredentials: true,
                 headers: {
                     Authorization: `Bearer ${token}`

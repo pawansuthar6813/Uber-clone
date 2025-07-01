@@ -283,6 +283,7 @@ const LocationSearchPanel = ({
       }
     } catch (err) {
       console.error('Error fetching location suggestions:', err)
+      console.log(err)
       setError('Failed to fetch suggestions')
       setLocations([])
     } finally {

@@ -15,6 +15,7 @@ const SocketContextProvider = ({children}) => {
         socket.on('disconnect', () => {
             console.log("disconnected from server")
         })
+        
 
         return () => {
             socket.disconnect();
@@ -26,8 +27,13 @@ const SocketContextProvider = ({children}) => {
     }
 
     const receiveMessage = (eventName, callback) => {
-        socket.on(eventName, callback)
+    socket.on(eventName, callback)
+    
+    // Return cleanup function
+    return () => {
+        socket.off(eventName, callback)
     }
+}
 
     return (
         <socketContext.Provider value={{socket, sendMessage, receiveMessage}}>
