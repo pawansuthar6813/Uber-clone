@@ -2,54 +2,113 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { NavLink, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 import mapPinImage from '../assets/map-pin.png';
 import dropLocationImage from '../assets/map-pin-drop-loc.png';
 import cardImage from '../assets/bank-card.png';
 import downArrow from '../assets/down_arrow.png';
 import personFaceImgage from '../assets/person-face.png';
+import { useRideInfoForCaptain } from '../Context/RideInfoForCaptain.jsx';
 
 const AcceptRide = ({
   acceptRidePanelOpen,
   setAcceptRidePanelOpen,
   acceptRidePanelRef,
   setRidePopUpPanelOpen,
+  setFinishRidePanelOpen,
   ride
 }) => {
 
   const [OTP, setOTP] = useState("");
+  const [errors, setErrors] = useState([])
   const arrRef = useRef(null);
   const navigate = useNavigate();
 
-  let {pickupLocation, destinationLocation, user, distance, duration, fare} = ride || {};
+  const {setRide} = useRideInfoForCaptain();
 
-    const pickup = {
-        mainAddress: ride?.pickupLocation.split(",")[0] || "",
-        completeAddress: ride?.pickupLocation.split(",").slice(1).join(",") || ""
-    };
+  let { pickupLocation, destinationLocation, user, distance, duration, fare } = ride || {};
 
-    const destination = {
-        mainAddress: ride?.destinationLocation.split(",")[0] || "",
-        completeAddress: ride?.destinationLocation.split(",").slice(1).join(",") || ""
-    };
+  const pickup = {
+    mainAddress: ride?.pickupLocation.split(",")[0] || "",
+    completeAddress: ride?.pickupLocation.split(",").slice(1).join(",") || ""
+  };
+
+  const destination = {
+    mainAddress: ride?.destinationLocation.split(",")[0] || "",
+    completeAddress: ride?.destinationLocation.split(",").slice(1).join(",") || ""
+  };
 
   function arrClickHandler() {
     setAcceptRidePanelOpen(false);
     setRidePopUpPanelOpen(true);
   }
 
-  function ignoreHandler() {
+  async function ignoreHandler() {
+
+    const token = localStorage.getItem("CaptainToken");
+
+    const response = await axios.post('http://localhost:8080/api/rides/cancel-ride', {
+      rideId: ride._id
+    }, {
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if(response.data.success){
+      setAcceptRidePanelOpen(false)
+      setRidePopUpPanelOpen(false)
+    }
     setAcceptRidePanelOpen(false);
     setRidePopUpPanelOpen(false);
   }
 
-  function submitHandler(e) {
+  async function submitHandler(e) {
     e.preventDefault();
-    navigate('/captain/riding');
+
+    const token = localStorage.getItem("CaptainToken");
+
+    try {
+      const response = await axios.post('http://localhost:8080/api/rides/start-ride', {
+        otp: OTP, rideId: ride._id
+      }, {
+        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if(response.data.success){
+        setRide(ride)
+        navigate('/captain/riding')
+        // setAcceptRidePanelOpen(false);
+        // setFinishRidePanelOpen(true)
+      }
+
+    } catch (error) {
+      if(error.response.data.message === 'invalid otp'){
+        setErrors(prevData => {
+        return [...prevData, 'invalid otp']
+      });
+      } else {
+        setErrors(prevData => {
+          return [...prevData, "internal server error"]
+        })
+      }
+      
+    }
+
   }
 
   useGSAP(() => {
+    gsap.set(acceptRidePanelRef.current, {
+      transform: 'translateY(100%)',
+      visibility: 'hidden'
+    })
     if (acceptRidePanelOpen) {
+      gsap.set(acceptRidePanelRef.current, { visibility: "visible" })
       gsap.to(acceptRidePanelRef.current, {
         transform: 'translateY(0)',
       });
@@ -134,7 +193,7 @@ const AcceptRide = ({
           name="otp"
           id="otp"
           value={OTP}
-          onChange={(e) => {setOTP(e.target.value)}}
+          onChange={(e) => { setOTP(e.target.value) }}
           placeholder="Enter OTP"
           className="bg-[#eeeeee] h-[40px] w-full rounded-lg pl-4 mt-2 outline-yellow-300 border mb-3"
         />
@@ -152,6 +211,18 @@ const AcceptRide = ({
           Cancel Ride
         </button>
       </form>
+
+      {/* this will show errors */}
+      <div className='text-red-500 flex flex-col justify-center items-center p-3'>
+        {
+          errors.map(error => {
+            return (
+              <p>{error}</p>
+            )
+          })
+        }
+      </div>
+
     </div>
   );
 };

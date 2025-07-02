@@ -32,6 +32,24 @@ export function initWebSocket(server) {
                 console.log("captain joined")
             }
         });
+
+        socket.on('update-captain-location', async (data) => {
+            const {userId, location} = data;
+            // console.log(location)
+
+            if(!location || !location.ltd || !location.lng){
+                console.log("invalid location")
+                return socket.emit('error', {message: "invalid location"})
+            }
+
+            await captainModel.findByIdAndUpdate(userId, {
+                location: {
+                    ltd: location.ltd,
+                    lng: location.lng
+                }
+            })
+
+        })
     });
 
     io.on("disconnect", (socket) => {
@@ -40,9 +58,10 @@ export function initWebSocket(server) {
 
 }
 
-export function sendMessageToSocket(socketId, message) {
+export function sendMessageToSocketId(socketId, messageObj) {
     if (io) {
-        io.to(socketId).emit("message", message);
+        io.to(socketId).emit(messageObj.event, messageObj.data);
+
     } else {
         console.error("Socket.io not initialized");
     }

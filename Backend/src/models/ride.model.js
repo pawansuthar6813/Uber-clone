@@ -8,7 +8,7 @@ const rideSchema = new mongoose.Schema({
         required: true
     },
 
-    captain: {
+    captainId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Captain'
     },

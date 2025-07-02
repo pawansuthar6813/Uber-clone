@@ -31,18 +31,28 @@ const RidePopUp = ({
         completeAddress: ride?.destinationLocation.split(",").slice(1).join(",") || ""
     };
     
-    if(ride){
+    
+
+    useEffect(() => {
+        if(ride){
         setRidePopUpPanelOpen(true)
     } else {
         setRidePopUpPanelOpen(false)
     }
+    }, [ride])
 
     function arrClickHandler() {
         setRidePopUpPanelOpen(false);
     }
 
     useGSAP(function () {
+
+        gsap.set(ridePopUpPanelRef.current, {
+            transform: 'translateY(100%)',
+            visibility: 'hidden'
+        })
     if (ridePopUpPanelOpen) {
+        gsap.set(ridePopUpPanelRef.current, {visibility: "visible"})
         gsap.to(ridePopUpPanelRef.current, {
             transform: 'translateY(0)',
             duration: 0.3,

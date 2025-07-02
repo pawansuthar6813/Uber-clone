@@ -87,10 +87,7 @@ const ConfirmedRide = ({
                 throw new Error("failed to create ride, Internal Server Error")
             }
 
-            // now update fare
-            // ride.fare = ride.fare[ride.vehicleType]
-
-            console.log(ride);
+    
 
             setLookingForCaptainPanelOpen(true)
 

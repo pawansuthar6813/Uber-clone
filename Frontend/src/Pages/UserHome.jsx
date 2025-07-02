@@ -15,6 +15,7 @@ import WaitForCaptain from '../Components/WaitForCaptain.jsx';
 import { useSocket } from '../Context/SocketContext.jsx';
 import { useUser } from '../Context/UserContext.jsx';
 import { useRide } from '../Context/RideContext.jsx';
+import { useNavigate } from 'react-router-dom';
 
 const UserHome = () => {
 
@@ -45,6 +46,8 @@ const UserHome = () => {
 
   const [rideAccepted, setRideAccepted] = useState(false);
 
+  const navigate = useNavigate();
+
 
   // create a ref for search panel
   const panelRef = useRef(null);
@@ -66,7 +69,7 @@ const UserHome = () => {
 
   const { user, setUser } = useUser();
 
-  
+
 
   const { ride, setRide } = useRide();
 
@@ -109,12 +112,12 @@ const UserHome = () => {
   useGSAP(function () {
 
     gsap.set(panelRef.current, {
-        transform: 'translateY(100%)',
-        visibility: 'hidden'
-      })
+      transform: 'translateY(100%)',
+      visibility: 'hidden'
+    })
 
     if (panelOpen) {
-      gsap.set(panelRef.current, {visibility: 'visible'})
+      gsap.set(panelRef.current, { visibility: 'visible' })
       gsap.to(panelRef.current, {
         height: '75%',
       })
@@ -136,12 +139,43 @@ const UserHome = () => {
 
   useEffect(() => {
     const cleanup = receiveMessage("ride-accepted", (data) => {
-      console.log(data)
+      setRide({
+        pickup: data.pickupLocation,
+        destination: data.destinationLocation,
+        distance: data.distance,
+        fare: data.fare,
+        time: data.duration,
+        rideStatus: data.status,
+        captain: data.captainId,
+        rideId: data._id,
+        userId: data.userId,
+        vehicle: data.captainId.vehicle,
+        otp: data.otp
+      })
       setRideAccepted(true)
 
     })
 
     return cleanup; // Call cleanup on unmount
+  }, [])
+
+
+  useEffect(() => {
+
+    const cleanup = receiveMessage("ride-started", (data) => {
+      setRide((prevData) => {
+        return {
+          ...prevData,
+          ['status']: 'ongoing'
+        }
+      })
+
+      navigate('/user/riding')
+
+    })
+
+
+    return cleanup;
   }, [])
 
   useEffect(() => {
@@ -150,7 +184,17 @@ const UserHome = () => {
       setConfirmedRidePanelOpen(false)
       setWaitForCaptainPanelOpen(true);
     }
-  },[rideAccepted])
+  }, [rideAccepted])
+
+    useEffect(() => {
+        const cleanup = receiveMessage('ride-cancelled', (data) => {
+            setRideAccepted(false)
+            setPanelOpen(true);
+            setWaitForCaptainPanelOpen(false)
+        })
+
+        return cleanup;
+    }, [])
 
 
 

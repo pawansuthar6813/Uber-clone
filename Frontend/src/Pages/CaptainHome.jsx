@@ -9,6 +9,7 @@ import AcceptRide from '../Components/AcceptRide.jsx';
 import { useSocket } from '../Context/SocketContext.jsx';
 import { useCaptain } from '../Context/CaptainContext.jsx';
 import axios from 'axios';
+import FinishRide from '../Components/FinishRide.jsx';
 
 const CaptainHome = () => {
 
@@ -18,6 +19,8 @@ const CaptainHome = () => {
 
   const [acceptRidePanelOpen, setAcceptRidePanelOpen] = useState(false);
   const acceptRidePanelRef = useRef(null);
+
+  const [finishRidePanelOpen, setFinishRidePanelOpen] = useState(false)
 
   const [ride, setRide] = useState(null);
 
@@ -54,7 +57,6 @@ const CaptainHome = () => {
     sendMessage("join", { userId: captain._id, userType: "captain" })
 
     receiveMessage('new-ride', (data) => {
-    console.log(data);
     setRide(data)
   })
 
@@ -129,9 +131,16 @@ const CaptainHome = () => {
             setAcceptRidePanelOpen={setAcceptRidePanelOpen}
             acceptRidePanelRef={acceptRidePanelRef}
             setRidePopUpPanelOpen={setRidePopUpPanelOpen}
+            setFinishRidePanelOpen={setFinishRidePanelOpen}
             ride={ride}
           />
         </div>
+
+        <FinishRide 
+          finishRidePanelOpen={finishRidePanelOpen}
+          setFinishRidePanelOpen={setFinishRidePanelOpen}
+          ride={ride}
+        />
 
       </div>
 

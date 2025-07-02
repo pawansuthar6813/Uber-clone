@@ -1,5 +1,7 @@
 import { Ride as rideModel } from "../models/ride.model.js";
 import { getDistanceTime } from "./maps.services.js";
+import { User as userModel } from "../models/user.model.js";
+import { Captain as captainModel } from "../models/captain.model.js";
 import crypto from 'crypto'
 
 export const getFareService = async (pickup, destination) => {
@@ -66,9 +68,10 @@ export const createRideService = async (
     otp,
     fare,
     distance,
-    duration: time*60,
+    duration: time,
     vehicleType
   })
+  // console.log("in ride service, ride: ", ride)
 
   return ride;
 }
@@ -80,4 +83,19 @@ export const generateOptService = (digits) => {
   const otp = crypto.randomInt(min, max).toString().padStart(digits, '0');
 
   return otp;
+}
+
+export const confirmRideService = async (userId, captainId, rideId) => {
+  
+  const user = await userModel.findById(userId);
+  const captain = await captainModel.findById(captainId);
+
+  const ride = await rideModel.findByIdAndUpdate(rideId, {
+    $set: {
+      status: 'accepted',
+      captainId: captain
+    }
+  }, {new: true}).select("+otp").populate("captainId")
+
+  return {ride, socketId: user.socketId}
 }

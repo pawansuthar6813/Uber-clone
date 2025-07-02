@@ -8,12 +8,11 @@ import { useState } from 'react';
 import personFaceImgage from "../assets/person-face.png";
 import cardImage from '../assets/bank-card.png'
 import { useRide } from '../Context/RideContext.jsx';
+import { useSocket } from '../Context/SocketContext.jsx';
+import { useEffect } from 'react';
 
 
 const WaitForCaptain = ({
-    time = "2",
-    name = "SANTH",
-    vehiclePlate = "KA15AK00-0",
     vehicleDescription = "White Suzuki S-presso LXI",
     rating = 4.5,
     mobile = 123456789,
@@ -29,6 +28,23 @@ const WaitForCaptain = ({
 
     const [copied, setCopied] = useState(false);
 
+    const {sendMessage, receiveMessage} = useSocket();
+    const { ride, setRide } = useRide();
+
+    const { pickup, destination, time, distance, captain, vehicle, fare, otp } = ride || {};
+
+    const pickupLocation = {
+        mainAddress: pickup.split(",")[0] || "",
+        completeAddress: pickup.split(",").slice(1).join(",") || ""
+    };
+
+    const destinationLocation = {
+        mainAddress: destination.split(",")[0] || "",
+        completeAddress: destination.split(",").slice(1).join(",") || ""
+    };
+
+    const captainName = `${captain?.fullName?.firstName} ${captain?.fullName?.lastName || ''}`
+
 
     const handleCopy = async () => {
         try {
@@ -39,6 +55,8 @@ const WaitForCaptain = ({
             console.error('Failed to copy:', err);
         }
     };
+
+
 
     useGSAP(function () {
         // Set initial state on component mount
@@ -87,8 +105,8 @@ const WaitForCaptain = ({
                     <img className='h-12 w-12 absolute top-[116px] rounded-full outline-1 border-2 border-gray-400' src={personFaceImgage} alt="" />
                 </div>
                 <div className='flex flex-col items-end'>
-                    <p>{name}</p>
-                    <h4 className='font-semibold text-lg'>{vehiclePlate}</h4>
+                    <p>{captainName}</p>
+                    <h4 className='font-semibold text-lg'>{vehicle?.plate || ''}</h4>
                     <p>{vehicleDescription}</p>
                     <div className='flex gap-2 items-center'>
                         <img className='h-[15px]' src={ratingStarImage} alt="" />
@@ -110,14 +128,18 @@ const WaitForCaptain = ({
                 </div>
             </div>
 
+            <div className='flex justify-end items-center p-3'>
+                <p className='font-semibold text-lg'>{`OTP : ${otp}`}</p>
+            </div>
+
             <hr className='h-0 w-full bg-black border-1 border-gray-400' />
 
 
             <div className='flex flex-row w-full justify-start items-center gap-3 mt-2 ml-3'>
                 <img className='h-5' src={mapPinImage} alt="" />
                 <div className='flex flex-col items-start justify-around'>
-                    <h3 className='font-semibold text-lg'>562/11-A</h3>
-                    <h3>Kaikondrahalli, Bengluru, Karnataka</h3>
+                    <h3 className='font-semibold text-lg'>{pickupLocation.mainAddress}</h3>
+                    <h3>{pickupLocation.completeAddress}</h3>
                 </div>
             </div>
 
@@ -127,8 +149,8 @@ const WaitForCaptain = ({
             <div className='w-full flex justify-start items-center gap-3 ml-3 '>
                 <img className='h-5' src={dropLocationImage} alt="" />
                 <div className='flex flex-col items-start justify-around'>
-                    <h3 className='font-semibold text-lg'>Third Wave Coffie</h3>
-                    <h3>17th cross road, Pwd Quartres, 1st sector, Hsr Layout, Bengaluru, Karnataka</h3>
+                    <h3 className='font-semibold text-lg'>{destinationLocation.mainAddress}</h3>
+                    <h3>{destinationLocation.completeAddress}</h3>
                 </div>
             </div>
 
@@ -138,7 +160,7 @@ const WaitForCaptain = ({
             <div className='w-full flex justify-start items-center gap-3 ml-3 mb-5'>
                 <img className='h-5' src={cardImage} alt="" />
                 <div className='flex flex-col items-start justify-around'>
-                    <h3 className='font-semibold text-lg'>193.20</h3>
+                    <h3 className='font-semibold text-lg'>{`₹${fare}`}</h3>
                     <h3>Cash Cash</h3>
                 </div>
             </div>

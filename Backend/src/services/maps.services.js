@@ -3,10 +3,9 @@ import { Captain as captainModel } from '../models/captain.model.js';
 
 
 export const getAddressCoordinate = async (address) => {
-    // console.log("debug point")
     try {
         const api_key = process.env.GOOGLE_MAPS_API_KEY;
-        // console.log("debug point 5")
+
         // URL encode the address to handle spaces and special characters
         const encodedAddress = encodeURIComponent(address);
         const path = `https://maps.gomaps.pro/maps/api/geocode/json?address=${encodedAddress}&key=${api_key}`;
@@ -29,12 +28,12 @@ export const getAddressCoordinate = async (address) => {
         
         
         // Extract coordinates from response.data, not response directly
-        const lat = response.data.results[0].geometry.location.lat;
+        const ltd = response.data.results[0].geometry.location.lat;
         const lng = response.data.results[0].geometry.location.lng;
-        // return res.status(200).json(response)
+
         // Return the coordinates
-        // console.log(response.data);
-        return { lat, lng, data: response.data };
+
+        return { ltd, lng, data: response.data };
         // return {lat, lng, data: response.data};
         
     } catch (error) {
@@ -100,14 +99,15 @@ export async function getAddressSuggestions(input) {
 }
 
 export const getCaptainsNearMe = async (ltd, lng, radius) => {
+
   
   const captains = await captainModel.find({
     location: {
       $geoWithin: {
-        $centerSphere: [ [ ltd, lng ], radius / 3963.2]
+        $centerSphere: [ [ ltd, lng ], radius / 6371]
       }
     }
-  })
+  }).select("-location -password")
 
   return captains;
 }
